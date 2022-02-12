@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:stem/stem.dart';
 
 class CounterState extends StemState {
