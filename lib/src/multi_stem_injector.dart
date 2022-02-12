@@ -1,24 +1,24 @@
 import 'package:flutter/widgets.dart';
+import 'package:stem/src/types.dart';
 
-import 'stem.dart';
-import 'stem_injector.dart';
+import 'stem_state_injector.dart';
 
-class MultiControllerInjector extends StatelessWidget {
-  final Widget child;
-  final List<Stem> controllers;
+// class MultiControllerInjector extends StatelessWidget {
+//   final Widget child;
+//   final List<StemStateBuilder> builders;
 
-  const MultiControllerInjector(
-      {Key? key, required this.controllers, required this.child})
-      : super(key: key);
+//   const MultiControllerInjector(
+//       {Key? key, required this.builders, required this.child})
+//       : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    Widget _parent = child;
+//   @override
+//   Widget build(BuildContext context) {
+//     Widget _parent = child;
 
-    for (var controller in controllers) {
-      _parent = StemInjector(controller: controller, child: _parent);
-    }
+//     for (var builder in builders) {
+//       _parent = StemStateInjector(stem: builder, child: _parent);
+//     }
 
-    return _parent;
-  }
-}
+//     return _parent;
+//   }
+// }

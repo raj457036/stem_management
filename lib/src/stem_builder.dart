@@ -1,63 +1,69 @@
 import 'package:flutter/widgets.dart';
 
-import 'stem_injector.dart';
+import 'stem_state_injector.dart';
 import 'stem.dart';
 import 'types.dart';
 
-typedef ListenerSubscriber<T> = List<ChangeNotifier> Function(T controller);
-
-class StemBuilder<T extends Stem> extends StatefulWidget {
-  final ListenerSubscriber<T> listen;
-  final StemWidgetBuilder<T> builder;
+class StemBuilder<T extends StemState> extends StatefulWidget {
+  final StemsGetter<T> listenTo;
+  final StemCachedChildWidgetBuilder<T> builder;
+  final Widget? child;
 
   const StemBuilder({
     Key? key,
-    required this.listen,
+    required this.listenTo,
     required this.builder,
+    this.child,
   }) : super(key: key);
 
   @override
   _StemBuilderState createState() => _StemBuilderState<T>();
 }
 
-class _StemBuilderState<T extends Stem> extends State<StemBuilder<T>> {
+class _StemBuilderState<T extends StemState> extends State<StemBuilder<T>> {
   T? _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = StemInjector.elementOf<T>(context)?.widget.controller;
-
-    if (_controller != null) {
-      final listeners = widget.listen(_controller!);
-      for (var listener in listeners) {
-        listener.addListener(_update);
-      }
-    }
+    _controller = StemStateInjector.elementOf<T>(context)?.widget.stem;
+    setListeners();
   }
 
-  void _update() => setState(() {});
+  void _listenerValueChanged() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
     try {
-      final T? _controller = StemInjector.of(context);
-      return widget.builder(context, _controller!);
+      final T? _controller = StemStateInjector.of(context);
+      return widget.builder(context, _controller!, widget.child);
     } catch (e) {
       return ErrorWidget(e);
     }
   }
 
-  @override
-  void dispose() {
+  void setListeners() {
     if (_controller != null) {
-      final listeners = widget.listen(_controller!);
+      final listeners = widget.listenTo(_controller!);
 
       for (var listener in listeners) {
-        listener.removeListener(_update);
+        listener.addListener(_listenerValueChanged);
       }
     }
+  }
 
+  void unsetListeners() {
+    if (_controller != null) {
+      final listeners = widget.listenTo(_controller!);
+      for (var listener in listeners) {
+        listener.removeListener(_listenerValueChanged);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    unsetListeners();
     super.dispose();
   }
 }
