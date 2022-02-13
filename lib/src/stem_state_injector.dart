@@ -2,11 +2,11 @@ import 'package:flutter/widgets.dart';
 
 import 'stem.dart';
 
-final _stemStates = <Object, StemState>{};
-
 class StemStateInjector<T extends StemState> extends InheritedWidget {
+  static final _weekMap = Expando<StemState>('STEM_STATE_WEEK_MAP');
+
   final T Function() create;
-  T? get stem => _stemStates[key] as T?;
+  T? get stem => _weekMap[key!] as T?;
 
   StemStateInjector({
     Key? key,
@@ -17,12 +17,12 @@ class StemStateInjector<T extends StemState> extends InheritedWidget {
   }
 
   void deflate() {
-    _stemStates.remove(key);
+    _weekMap[key!] = null;
   }
 
   void inflate() {
-    if (_stemStates[key] == null) {
-      _stemStates[key!] = create();
+    if (_weekMap[key!] == null) {
+      _weekMap[key!] = create();
     }
   }
 
@@ -51,7 +51,7 @@ class StemStateInjector<T extends StemState> extends InheritedWidget {
 
   @override
   bool updateShouldNotify(StemStateInjector<T> oldWidget) {
-    if (oldWidget.key != key) _stemStates.remove(oldWidget.key);
+    if (oldWidget.key != key) _weekMap[oldWidget.key!] = null;
     return oldWidget.stem != stem;
   }
 

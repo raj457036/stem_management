@@ -5,11 +5,57 @@ import 'stem_notifiers.dart';
 import 'stem_state_injector.dart';
 import 'types.dart';
 
+/// {@template stem_listener}
+/// Use this when you only want to listen for the change in [Stem]
+/// for side effects.
+///
+/// ```dart
+/// // CounterState
+/// class CounterState extends StemState {
+///   final counter = Stem('counter', 0);
+///
+///   void increment() => counter.value++;
+///   void decrement() => counter.value--;
+///
+///   @override
+///   List<Stem> get props => [counter];
+/// }
+///
+/// // widgets
+///
+/// class Counter extends StatelessWidget {
+///    @override
+///    Widget build(BuildContext context) {
+///      return StemStateInjector<CounterState>(
+///         create: () => CounterState(),
+///           child: StemListener<CounterState, int>(
+///            listenTo: (controller) => controller.counter,
+///            onListen: (value) {
+///              // onListen will be called every time controller.counter
+///              // changes its value.
+///              print("counter value changed");
+///            },
+///            child: SomeOtherWidget(),
+///           )
+///         );
+///    }
+/// }
+/// ```
+///
+///{@endtemplate}
 class StemListener<T extends StemState, K> extends StatefulWidget {
+  /// A widget child of which this [StemListener] become parent of.
   final Widget child;
+
+  /// A callback that returns the [Stem] to which this [StemListener] will
+  /// listen to.
   final StemGetter<T, K> listenTo;
+
+  /// A callback to be called when there is any change captured in
+  /// the [Stem] returned from `listenTo` with value of this [Stem];
   final SideEffectCallback<K> onListen;
 
+  /// {@macro stem_listener}
   const StemListener({
     Key? key,
     required this.listenTo,
@@ -44,6 +90,7 @@ class _StemListenerState<T extends StemState, K>
     return widget.child;
   }
 
+  // add listeners
   void setListeners() {
     if (_controller != null) {
       _stem = widget.listenTo(_controller!);
@@ -51,6 +98,7 @@ class _StemListenerState<T extends StemState, K>
     }
   }
 
+  // remove listeners
   void unsetListeners() {
     if (_controller != null) {
       _stem?.removeListener(_listenerValueChanged);

@@ -1,10 +1,11 @@
 import 'dart:developer';
 
 import 'package:example/apps/counter/counter.dart';
+import 'package:example/apps/todo/todo.dart';
 import 'package:flutter/material.dart';
 import 'package:stem/stem.dart';
 
-class Observer extends StemChangeObserver {
+class CustomStemEventObserver extends StemChangeObserver {
   @override
   void onStemChange(StemState state, oldValue, Stem newValue) {
     super.onStemChange(state, oldValue, newValue);
@@ -23,10 +24,18 @@ class Observer extends StemChangeObserver {
     super.onDisposeStemState(state);
     log("Deleted: $state : ${state.hashCode}");
   }
+
+  @override
+  void onCustomStemEvent(StemState state, Object value) {
+    super.onCustomStemEvent(state, value);
+
+    log("Custom Event (${state.runtimeType}: $value");
+  }
 }
 
 void main() {
-  StemConfig.instance.observer = Observer();
+  WidgetsFlutterBinding.ensureInitialized();
+  StemConfig.instance.observer = CustomStemEventObserver();
 
   runApp(const MyApp());
 }
@@ -44,6 +53,7 @@ class MyApp extends StatelessWidget {
       home: const MyHomePage(title: 'Stem State Management Examples'),
       routes: {
         "/counter": (context) => const CounterApp(),
+        "/todo": (context) => const TodoApp(),
       },
     );
   }
@@ -65,6 +75,10 @@ class MyHomePage extends StatelessWidget {
           ListTile(
             title: const Text("Counter App"),
             onTap: () => Navigator.pushNamed(context, '/counter'),
+          ),
+          ListTile(
+            title: const Text("Todo App"),
+            onTap: () => Navigator.pushNamed(context, '/todo'),
           )
         ],
       ),
