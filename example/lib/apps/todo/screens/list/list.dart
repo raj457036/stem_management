@@ -1,7 +1,7 @@
-import 'package:example/apps/todo/global/todo_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:stem/stem.dart';
 
+import '../../controllers/todo_controller.dart';
 import 'todo_bottom_sheet.dart';
 
 class TodoList extends StatelessWidget {

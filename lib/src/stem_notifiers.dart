@@ -4,8 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stem/stem.dart';
 
-import 'utils/union_state.dart';
-
 /// {@template stem}
 /// A [ChangeNotifier] that holds a single value and tightly
 /// associated with [StemState] via `props` getter.
@@ -60,7 +58,6 @@ class Stem<T> extends ChangeNotifier
   ///
   /// [DebouncedStem]: A [Stem] that delays its [value] replacement and
   /// prevent frequent changes.
-  ///
   Stem(this.name, this._value, {bool registerEvent = true}) {
     eventActive = registerEvent;
   }
@@ -86,6 +83,9 @@ class Stem<T> extends ChangeNotifier
     }
     notifyListeners();
   }
+
+  /// force update this stem
+  void forceUpdate() => notifyListeners();
 
   /// A helper to get `value` via call syntex
   ///

@@ -36,6 +36,7 @@ class CounterPage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text("Last Data $last"),
+                  const SizedBox(height: 10),
                   const CircularProgressIndicator()
                 ],
               ),
