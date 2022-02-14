@@ -6,7 +6,7 @@ class StemStateInjector<T extends StemState> extends InheritedWidget {
   static final _weekMap = Expando<StemState>('STEM_STATE_WEEK_MAP');
 
   final T Function() create;
-  T? get stem => _weekMap[key!] as T?;
+  T? get state => _weekMap[key!] as T?;
 
   StemStateInjector({
     Key? key,
@@ -32,7 +32,7 @@ class StemStateInjector<T extends StemState> extends InheritedWidget {
 
     if (ref != null) {
       ref.inflate();
-      return ref.stem;
+      return ref.state;
     }
 
     throw Exception(
@@ -52,7 +52,7 @@ class StemStateInjector<T extends StemState> extends InheritedWidget {
   @override
   bool updateShouldNotify(StemStateInjector<T> oldWidget) {
     if (oldWidget.key != key) _weekMap[oldWidget.key!] = null;
-    return oldWidget.stem != stem;
+    return oldWidget.state != state;
   }
 
   @override
@@ -71,16 +71,16 @@ class _ControllerElement<T extends StemState> extends InheritedElement {
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
 
-    widget.stem?.initState();
+    widget.state?.initState();
 
     WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      widget.stem?.afterBuild();
+      widget.state?.afterBuild();
     });
   }
 
   @override
   void unmount() {
-    widget.stem?.dispose();
+    widget.state?.dispose();
     widget.deflate();
     super.unmount();
   }

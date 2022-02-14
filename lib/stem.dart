@@ -9,3 +9,4 @@ export 'src/stem_notifiers.dart';
 export 'src/stem_config.dart';
 export 'src/stem_listener.dart';
 export 'src/utils/union_state.dart';
+export 'src/stem_event_subscriber.dart';

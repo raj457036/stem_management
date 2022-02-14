@@ -26,7 +26,7 @@ class _StemBuilderState<T extends StemState> extends State<StemBuilder<T>> {
   @override
   void initState() {
     super.initState();
-    _controller = StemStateInjector.elementOf<T>(context)?.widget.stem;
+    _controller = StemStateInjector.elementOf<T>(context)?.widget.state;
     setListeners();
   }
 
