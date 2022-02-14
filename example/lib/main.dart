@@ -5,12 +5,14 @@ import 'package:example/apps/todo/todo.dart';
 import 'package:flutter/material.dart';
 import 'package:stem/stem.dart';
 
+import 'apps/async_counter/counter.dart';
+
 class CustomStemEventObserver extends StemChangeObserver {
   @override
-  void onStemChange(StemState state, oldValue, Stem newValue) {
-    super.onStemChange(state, oldValue, newValue);
-    log("Transition (${state.runtimeType}: ${newValue.name}): Current $oldValue"
-        " -> Next State ${newValue.value}");
+  void onStemChange(StemState state, String name, oldValue, newValue) {
+    super.onStemChange(state, name, oldValue, newValue);
+    log("Transition (${state.runtimeType}: $name): Current $oldValue"
+        " -> Next State $newValue");
   }
 
   @override
@@ -54,6 +56,7 @@ class MyApp extends StatelessWidget {
       routes: {
         "/counter": (context) => const CounterApp(),
         "/todo": (context) => const TodoApp(),
+        "/asyncCounter": (context) => const AsyncCounterApp(),
       },
     );
   }
@@ -79,7 +82,11 @@ class MyHomePage extends StatelessWidget {
           ListTile(
             title: const Text("Todo App"),
             onTap: () => Navigator.pushNamed(context, '/todo'),
-          )
+          ),
+          ListTile(
+            title: const Text("Async Counter App"),
+            onTap: () => Navigator.pushNamed(context, "/asyncCounter"),
+          ),
         ],
       ),
     );

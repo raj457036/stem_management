@@ -15,4 +15,4 @@ typedef StemCachedChildWidgetBuilder<T> = Widget Function(
 
 typedef StemStateBuilder<T extends StemState> = T Function();
 
-typedef SideEffectCallback<T> = void Function(T value);
+typedef SideEffectCallback<T> = void Function(T controller);

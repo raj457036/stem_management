@@ -53,7 +53,7 @@ class StemListener<T extends StemState, K> extends StatefulWidget {
 
   /// A callback to be called when there is any change captured in
   /// the [Stem] returned from `listenTo` with value of this [Stem];
-  final SideEffectCallback<K> onListen;
+  final SideEffectCallback<T> onListen;
 
   /// {@macro stem_listener}
   const StemListener({
@@ -79,7 +79,7 @@ class _StemListenerState<T extends StemState, K>
     setListeners();
   }
 
-  void _listenerValueChanged() => widget.onListen(_stem!.value!);
+  void _listenerValueChanged() => widget.onListen(_controller!);
 
   @override
   Widget build(BuildContext context) {

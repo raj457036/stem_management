@@ -4,7 +4,8 @@ import 'package:stem/stem.dart';
 abstract class StemChangeObserver {
   void onCreateStemState(StemState state) {}
   void onDisposeStemState(StemState state) {}
-  void onStemChange(StemState state, oldValue, Stem newValue) {}
+  void onStemChange(
+      StemState state, String name, Object oldValue, Object newValue) {}
   void onCustomStemEvent(StemState state, Object value) {}
 }
 
@@ -35,10 +36,11 @@ mixin StemEventNotifier {
   /// Called when [Stem] changes its value.
   @mustCallSuper
   @protected
-  void change(StemState state, oldValue, Stem newValue) {
+  void change(StemState state, String name, oldValue, newValue) {
     if (!eventActive) return;
     if (StemConfig.instance.observer != null) {
-      StemConfig.instance.observer?.onStemChange(state, oldValue, newValue);
+      StemConfig.instance.observer
+          ?.onStemChange(state, name, oldValue, newValue);
     }
   }
 

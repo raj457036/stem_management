@@ -1,7 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:stem/stem.dart';
+
+import 'utils/union_state.dart';
 
 /// {@template stem}
 /// A [ChangeNotifier] that holds a single value and tightly
@@ -79,7 +82,7 @@ class Stem<T> extends ChangeNotifier
     _value = newValue;
 
     if (eventActive) {
-      change(_parent!, _temp, this);
+      change(_parent!, name, _temp, _value);
     }
     notifyListeners();
   }
@@ -185,7 +188,7 @@ class DebouncedStem<T> extends Stem<T> {
       _value = newValue;
 
       if (eventActive) {
-        change(_parent!, _temp, this);
+        change(_parent!, name, _temp, _value);
       }
 
       notifyListeners();
@@ -196,5 +199,96 @@ class DebouncedStem<T> extends Stem<T> {
   void dispose() {
     timer?.cancel();
     super.dispose();
+  }
+}
+
+class TripleStem<T> extends Stem<UnionStateType> {
+  dynamic _error;
+  T _data;
+
+  TripleStem(
+    String name,
+    T value, {
+    bool registerEvent = true,
+  })  : _data = value,
+        super(
+          name,
+          value != null ? UnionStateType.data : UnionStateType.loading,
+          registerEvent: registerEvent,
+        );
+
+  UnionStateType get currentState => value;
+  dynamic get error => _error;
+  T get data => _data;
+
+  bool get isLoading => currentState == UnionStateType.loading;
+  bool get hasData => currentState == UnionStateType.data;
+  bool get hasError => currentState == UnionStateType.error;
+
+  @protected
+  @override
+  set value(UnionStateType newValue) {
+    final check = doPreChecks(newValue);
+
+    if (!check) return;
+    _value = newValue;
+    notifyListeners();
+  }
+
+  setError(dynamic error) {
+    if (eventActive) {
+      _emitEvent("Error: $error");
+    }
+    _error = error;
+    value = UnionStateType.error;
+  }
+
+  setLoading() {
+    if (eventActive) {
+      _emitEvent('Loading');
+    }
+    value = UnionStateType.loading;
+  }
+
+  setData(T data) {
+    if (eventActive) {
+      _emitEvent(data);
+    }
+    _data = data;
+    value = UnionStateType.data;
+  }
+
+  Widget on({
+    required ErroBuilder<dynamic> error,
+    required DataBuilder<T> data,
+    required LoadingBuilder loading,
+  }) {
+    switch (value) {
+      case UnionStateType.data:
+        return data(_data);
+      case UnionStateType.error:
+        return error(_error);
+      case UnionStateType.loading:
+      default:
+        return loading(_data);
+    }
+  }
+
+  _emitEvent(dynamic next) {
+    dynamic current;
+
+    switch (value) {
+      case UnionStateType.loading:
+        current = 'Loaidng';
+        break;
+      case UnionStateType.error:
+        current = 'Error: $error';
+        break;
+      case UnionStateType.data:
+      default:
+        current = data;
+    }
+
+    change(_parent!, name, current, next);
   }
 }

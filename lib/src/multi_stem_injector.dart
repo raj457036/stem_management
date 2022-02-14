@@ -3,11 +3,11 @@ import 'package:stem/src/types.dart';
 
 import 'stem_state_injector.dart';
 
-class MultiStepStateInjector extends StatelessWidget {
+class MultiStemStateInjector extends StatelessWidget {
   final Widget child;
   final List<StemStateBuilder> builders;
 
-  const MultiStepStateInjector(
+  const MultiStemStateInjector(
       {Key? key, required this.builders, required this.child})
       : super(key: key);
 
