@@ -50,7 +50,6 @@ class StemStateInjector<T extends StemState> extends InheritedWidget {
     Key? key,
     required T Function() create,
     required Widget child,
-    bool lazy = true,
   })  : holder = StateHolder<T>(
             identity: child.hashCode, create: create, autoInflate: true),
         super(
