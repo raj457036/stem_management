@@ -2,10 +2,10 @@ import 'package:flutter/widgets.dart';
 
 import 'stem_state.dart';
 
-final _stateCache = <dynamic, StemState>{};
+final _stateCache = <ValueKey<int>, StemState>{};
 
 class StateHolder<T extends StemState> {
-  final ValueKey _identity;
+  final ValueKey<int> _identity;
   final T Function() create;
   final bool autoInflate;
 
@@ -19,15 +19,19 @@ class StateHolder<T extends StemState> {
 
   T get state {
     if (!_inflated && autoInflate) {
+      // if autoInflate is true we will inflate the stemState
+      // if its not in the memory.
       inflate();
     }
     return _stateCache[_identity] as T;
   }
 
+  /// Add stemState to cache
   inflate() {
     _stateCache[_identity] ??= create();
   }
 
+  /// Remove stemState to cache
   deflate() {
     _stateCache.remove(_identity);
   }
@@ -57,22 +61,11 @@ class StemStateInjector<T extends StemState> extends InheritedWidget {
           child: child,
         );
 
-  /// removes State from the memory
-  void _deflate() {
-    holder.deflate();
-  }
-
-  /// adds State in the memory
-  void _inflate() {
-    holder.inflate();
-  }
-
   static K? of<K extends StemState>(BuildContext context) {
     final ref =
         context.dependOnInheritedWidgetOfExactType<StemStateInjector<K>>();
 
     if (ref != null) {
-      ref._inflate();
       return ref.holder.state;
     }
 
@@ -81,28 +74,35 @@ class StemStateInjector<T extends StemState> extends InheritedWidget {
     );
   }
 
-  static _ControllerElement<K>? elementOf<K extends StemState>(
+  /// Returns the [Element] of [StemStateInjector] from the widget tree
+  static _StemStateInjectorElement<K>? elementOf<K extends StemState>(
       BuildContext context) {
     final element =
         context.getElementForInheritedWidgetOfExactType<StemStateInjector<K>>();
 
-    (element?.widget as StemStateInjector<K>?)?._inflate();
-    return element as _ControllerElement<K>?;
+    return element as _StemStateInjectorElement<K>?;
   }
 
   @override
   bool updateShouldNotify(StemStateInjector<T> oldWidget) {
-    return oldWidget.child != child;
+    final shouldNotify = oldWidget.child != child;
+
+    if (shouldNotify) {
+      // Removing the unnecessary stemState from the memory
+      final _key = ValueKey(oldWidget.child.hashCode);
+      _stateCache.remove(_key);
+    }
+    return shouldNotify;
   }
 
   @override
-  _ControllerElement<T> createElement() {
-    return _ControllerElement(this);
+  _StemStateInjectorElement<T> createElement() {
+    return _StemStateInjectorElement(this);
   }
 }
 
-class _ControllerElement<T extends StemState> extends InheritedElement {
-  _ControllerElement(StemStateInjector<T> widget) : super(widget);
+class _StemStateInjectorElement<T extends StemState> extends InheritedElement {
+  _StemStateInjectorElement(StemStateInjector<T> widget) : super(widget);
 
   @override
   StemStateInjector<T> get widget => super.widget as StemStateInjector<T>;
@@ -119,7 +119,7 @@ class _ControllerElement<T extends StemState> extends InheritedElement {
   @override
   void unmount() {
     widget.state.dispose();
-    widget._deflate();
+    widget.holder.deflate();
     super.unmount();
   }
 }
