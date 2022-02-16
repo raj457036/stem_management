@@ -1,9 +1,11 @@
 import 'package:flutter/widgets.dart';
 
-import 'stem.dart';
+import 'stem_state.dart';
 
 class StemStateInjector<T extends StemState> extends InheritedWidget {
   static final _weekMap = Expando<StemState>('STEM_STATE_WEEK_MAP');
+
+  static bool stateExist<K>(Key key) => _weekMap[key] is K;
 
   final T Function() create;
   T? get state => _weekMap[key!] as T?;

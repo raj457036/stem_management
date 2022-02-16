@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import 'stem.dart';
+import 'stem_state.dart';
 import 'stem_state_injector.dart';
 import 'types.dart';
 

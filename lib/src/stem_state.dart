@@ -7,7 +7,7 @@ import 'package:stem/stem.dart';
 /// [StemState] has 3 life cycle hooks
 ///
 /// 1. `initState` : Called when this StemState is inserted into the tree.
-/// 2. `afterBuild`: Called just after the first frame is called, aftet this
+/// 2. `afterBuild`: Called just after the first frame is called, after this
 /// StemState is inserted into the tree.
 /// 3. `dispose`: Called when this [StemState] is removed from the tree permanently.
 ///
@@ -43,7 +43,7 @@ abstract class StemState with StemEventNotifier {
     }
   }
 
-  /// Called just after the first frame is called, aftet this
+  /// Called just after the first frame is called, after this
   /// StemState is inserted into the tree.
   ///
   /// The framework will call this method exactly once after
@@ -62,6 +62,7 @@ abstract class StemState with StemEventNotifier {
     for (var prop in props) {
       prop.dispose();
     }
+    _mounted = false;
     if (eventActive) {
       deleted(this);
     }

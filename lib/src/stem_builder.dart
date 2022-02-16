@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'stem_state_injector.dart';
-import 'stem.dart';
+import 'stem_state.dart';
 import 'types.dart';
 
 class StemBuilder<T extends StemState> extends StatefulWidget {

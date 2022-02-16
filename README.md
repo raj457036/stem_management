@@ -11,14 +11,14 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages).
 -->
 
-# STEM STATE MANAGEMENT
+# STEM STATE MANAGEMENT (** WIP **)
 
 Most Simple, Powerful and Straight Forward State Management for flutter.
 
 ## Features
 
 1. Simple and Straight Forward
-2. Granualar build control
+2. Granular build control
 3. Strict and Unidirectional data flow
 4. Predictable state change
 5. Super light weight
