@@ -36,7 +36,7 @@ mixin StemEventNotifier {
   /// Called when [Stem] changes its value.
   @mustCallSuper
   @protected
-  void change(StemState state, String name, oldValue, newValue) {
+  void changeEvent(StemState state, String name, oldValue, newValue) {
     if (!eventActive) return;
     if (StemConfig.instance.observer != null) {
       StemConfig.instance.observer

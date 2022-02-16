@@ -2,30 +2,70 @@ import 'package:flutter/widgets.dart';
 
 import 'stem_state.dart';
 
-class StemStateInjector<T extends StemState> extends InheritedWidget {
-  static final _weekMap = Expando<StemState>('STEM_STATE_WEEK_MAP');
+final _stateCache = <dynamic, StemState>{};
 
-  static bool stateExist<K>(Key key) => _weekMap[key] is K;
-
+class StateHolder<T extends StemState> {
+  final ValueKey _identity;
   final T Function() create;
-  T? get state => _weekMap[key!] as T?;
+  final bool autoInflate;
+
+  bool get _inflated => _stateCache[_identity] != null;
+
+  StateHolder({
+    required this.create,
+    required this.autoInflate,
+    required int identity,
+  }) : _identity = ValueKey<int>(identity);
+
+  T get state {
+    if (!_inflated && autoInflate) {
+      inflate();
+    }
+    return _stateCache[_identity] as T;
+  }
+
+  inflate() {
+    _stateCache[_identity] ??= create();
+  }
+
+  deflate() {
+    _stateCache.remove(_identity);
+  }
+}
+
+class StemStateInjector<T extends StemState> extends InheritedWidget {
+  final StateHolder<T> holder;
+
+  /// returns If the [K] is in the memory
+  ///
+  /// **NOTE**
+  /// This operation runs on O(n) because it checks for every
+  /// available StemState in the memory.
+  static bool stateExist<K extends StemState>() =>
+      _stateCache.values.any((element) => element is K);
+
+  T get state => holder.state;
 
   StemStateInjector({
     Key? key,
-    required this.create,
+    required T Function() create,
     required Widget child,
-  }) : super(key: key ?? ValueKey("$T"), child: child) {
-    inflate();
+    bool lazy = true,
+  })  : holder = StateHolder<T>(
+            identity: child.hashCode, create: create, autoInflate: true),
+        super(
+          key: key,
+          child: child,
+        );
+
+  /// removes State from the memory
+  void _deflate() {
+    holder.deflate();
   }
 
-  void deflate() {
-    _weekMap[key!] = null;
-  }
-
-  void inflate() {
-    if (_weekMap[key!] == null) {
-      _weekMap[key!] = create();
-    }
+  /// adds State in the memory
+  void _inflate() {
+    holder.inflate();
   }
 
   static K? of<K extends StemState>(BuildContext context) {
@@ -33,8 +73,8 @@ class StemStateInjector<T extends StemState> extends InheritedWidget {
         context.dependOnInheritedWidgetOfExactType<StemStateInjector<K>>();
 
     if (ref != null) {
-      ref.inflate();
-      return ref.state;
+      ref._inflate();
+      return ref.holder.state;
     }
 
     throw Exception(
@@ -47,14 +87,13 @@ class StemStateInjector<T extends StemState> extends InheritedWidget {
     final element =
         context.getElementForInheritedWidgetOfExactType<StemStateInjector<K>>();
 
-    (element?.widget as StemStateInjector<K>).inflate();
+    (element?.widget as StemStateInjector<K>?)?._inflate();
     return element as _ControllerElement<K>?;
   }
 
   @override
   bool updateShouldNotify(StemStateInjector<T> oldWidget) {
-    if (oldWidget.key != key) _weekMap[oldWidget.key!] = null;
-    return oldWidget.state != state;
+    return oldWidget.child != child;
   }
 
   @override
@@ -71,19 +110,17 @@ class _ControllerElement<T extends StemState> extends InheritedElement {
 
   @override
   void mount(Element? parent, Object? newSlot) {
-    super.mount(parent, newSlot);
-
-    widget.state?.initState();
-
+    widget.state.initState();
     WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      widget.state?.afterBuild();
+      widget.state.afterBuild();
     });
+    super.mount(parent, newSlot);
   }
 
   @override
   void unmount() {
-    widget.state?.dispose();
-    widget.deflate();
+    widget.state.dispose();
+    widget._deflate();
     super.unmount();
   }
 }

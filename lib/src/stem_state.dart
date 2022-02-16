@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+
 import 'package:stem/stem.dart';
 
 /// [StemState] is like Flutter's [State] object that hold
@@ -26,6 +27,21 @@ abstract class StemState with StemEventNotifier {
   @protected
   bool _mounted = false;
 
+  StemState() {
+    // attach every Stem with this StemState object.
+    for (var prop in props) {
+      prop.attachStemState(this);
+    }
+
+    onCreate();
+  }
+
+  /// Called when this object is created and all the Stem's
+  /// in this object got attached.
+  ///
+  /// This is called before `initState`
+  void onCreate() {}
+
   /// Whether this StemState object is currently in a tree.
   bool get mounted => _mounted;
 
@@ -35,9 +51,6 @@ abstract class StemState with StemEventNotifier {
   /// for each StemState object it creates.
   @mustCallSuper
   void initState() {
-    for (var prop in props) {
-      prop.setParent(this);
-    }
     if (eventActive) {
       created(this);
     }

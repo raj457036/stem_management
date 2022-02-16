@@ -35,7 +35,7 @@ class _StemBuilderState<T extends StemState> extends State<StemBuilder<T>> {
   @override
   Widget build(BuildContext context) {
     try {
-      final T? _controller = StemStateInjector.of(context);
+      final T? _controller = StemStateInjector.of<T>(context);
       return widget.builder(context, _controller!, widget.child);
     } catch (e) {
       return ErrorWidget(e);

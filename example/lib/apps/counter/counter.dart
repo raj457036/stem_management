@@ -9,7 +9,6 @@ class CounterApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StemStateInjector(
-      key: const ValueKey('counter'),
       create: () => CounterState(),
       child: const CounterPage(),
     );

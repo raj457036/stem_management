@@ -44,7 +44,7 @@ class Stem<T> extends ChangeNotifier
   /// Name of this [Stem] for [StemChangeObserver]
   final String name;
 
-  /// Actial value of this [Stem]
+  /// Actual value of this [Stem]
   late T _value;
 
   /// [StemState] with which this [Stem] is associated with.
@@ -63,7 +63,7 @@ class Stem<T> extends ChangeNotifier
   }
 
   /// This method is used by [StemState] to associate this [Stem] with itself
-  void setParent(StemState parent) => _parent = parent;
+  void attachStemState(StemState parent) => _parent = parent;
 
   /// Value of this [Stem]
   @override
@@ -79,7 +79,7 @@ class Stem<T> extends ChangeNotifier
     _value = newValue;
 
     if (eventActive) {
-      change(_parent!, name, _temp, _value);
+      changeEvent(_parent!, name, _temp, _value);
     }
     notifyListeners();
   }
@@ -87,13 +87,13 @@ class Stem<T> extends ChangeNotifier
   /// force update this stem
   void forceUpdate() => notifyListeners();
 
-  /// A helper to get `value` via call syntex
+  /// A helper to get `value` via call syntax
   ///
   /// ```dart
   ///class CustomStemState extends StemState {
   ///   final count = Stem('count', 0);
   ///
-  ///   @overried
+  ///   @override
   ///   void initState() {
   ///     super.initState();
   ///
@@ -188,7 +188,7 @@ class DebouncedStem<T> extends Stem<T> {
       _value = newValue;
 
       if (eventActive) {
-        change(_parent!, name, _temp, _value);
+        changeEvent(_parent!, name, _temp, _value);
       }
 
       notifyListeners();
@@ -203,7 +203,10 @@ class DebouncedStem<T> extends Stem<T> {
 }
 
 class TripleStem<T> extends Stem<UnionStateType> {
+  /// Error object for this Stem
   dynamic _error;
+
+  /// Data object for this Stem
   T _data;
 
   TripleStem(
@@ -217,12 +220,22 @@ class TripleStem<T> extends Stem<UnionStateType> {
           registerEvent: registerEvent,
         );
 
+  /// getter to know the current state
   UnionStateType get currentState => value;
+
+  /// getter to get the last error value
   dynamic get error => _error;
+
+  /// getter to get the last data value
   T get data => _data;
 
+  /// getter to know if the current stem state is loading
   bool get isLoading => currentState == UnionStateType.loading;
+
+  /// getter to know if the current stem state is data
   bool get hasData => currentState == UnionStateType.data;
+
+  /// getter to know if the current stem state is error
   bool get hasError => currentState == UnionStateType.error;
 
   @protected
@@ -235,31 +248,38 @@ class TripleStem<T> extends Stem<UnionStateType> {
     notifyListeners();
   }
 
-  setError(dynamic error) {
-    if (eventActive) {
-      _emitEvent("Error: $error");
-    }
+  /// Set error state
+  void setError(dynamic error) {
+    final current = _getCurrentState();
     _error = error;
     value = UnionStateType.error;
+    if (eventActive) {
+      _emitEvent(current, "Error: $error");
+    }
   }
 
-  setLoading() {
-    if (eventActive) {
-      _emitEvent('Loading');
-    }
+  /// Set loading state
+  void setLoading() {
+    final current = _getCurrentState();
     value = UnionStateType.loading;
+    if (eventActive) {
+      _emitEvent(current, 'Loading');
+    }
   }
 
-  setData(T data) {
-    if (eventActive) {
-      _emitEvent(data);
-    }
+  /// Set data state
+  void setData(T data) {
+    final current = _getCurrentState();
     _data = data;
     value = UnionStateType.data;
+    if (eventActive) {
+      _emitEvent(current, data);
+    }
   }
 
+  /// Construct widget based on the current state of this Stem
   Widget on({
-    required ErroBuilder<dynamic> error,
+    required ErrorBuilder<dynamic> error,
     required DataBuilder<T> data,
     required LoadingBuilder loading,
   }) {
@@ -274,21 +294,21 @@ class TripleStem<T> extends Stem<UnionStateType> {
     }
   }
 
-  _emitEvent(dynamic next) {
-    dynamic current;
-
+  /// Returns current state just before next state is emitted
+  dynamic _getCurrentState() {
     switch (value) {
       case UnionStateType.loading:
-        current = 'Loaidng';
-        break;
+        return 'Loading';
       case UnionStateType.error:
-        current = 'Error: $error';
-        break;
+        return 'Error: $error';
       case UnionStateType.data:
       default:
-        current = data;
+        return data;
     }
+  }
 
-    change(_parent!, name, current, next);
+  /// Release event to event observer
+  _emitEvent(dynamic current, dynamic next) {
+    changeEvent(_parent!, name, current, next);
   }
 }

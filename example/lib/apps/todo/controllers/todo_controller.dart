@@ -13,7 +13,6 @@ class TodoStateController extends StemState {
       content: content,
       pinned: false,
     );
-    todos.value.add(todo);
     todos.value = [...todos(), todo];
     nextId.value++;
   }
