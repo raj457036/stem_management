@@ -2,96 +2,68 @@ import 'package:flutter/widgets.dart';
 
 import 'stem_state.dart';
 
-final _stateCache = <ValueKey<int>, StemState>{};
+typedef CreateStemState<T extends StemState> = T Function();
 
-class StateHolder<T extends StemState> {
-  final ValueKey<int> _identity;
-  final T Function() create;
-  final bool autoInflate;
+class _StateDelegate<T extends StemState> {
+  final CreateStemState<T> create;
+  late _StemStateInjectorElement owner;
 
-  bool get _inflated => _stateCache[_identity] != null;
-
-  StateHolder({
+  _StateDelegate({
     required this.create,
-    required this.autoInflate,
-    required int identity,
-  }) : _identity = ValueKey<int>(identity);
-
-  T get state {
-    if (!_inflated && autoInflate) {
-      // if autoInflate is true we will inflate the stemState
-      // if its not in the memory.
-      inflate();
-    }
-    return _stateCache[_identity] as T;
-  }
-
-  /// Add stemState to cache
-  inflate() {
-    _stateCache[_identity] ??= create();
-  }
-
-  /// Remove stemState to cache
-  deflate() {
-    _stateCache.remove(_identity);
-  }
+  });
 }
 
-class StemStateInjector<T extends StemState> extends InheritedWidget {
-  final StateHolder<T> holder;
+class StateInjector<T extends StemState> extends InheritedWidget {
+  final _StateDelegate<T> holder;
 
   /// returns If the [K] is in the memory
   ///
   /// **NOTE**
   /// This operation runs on O(n) because it checks for every
   /// available StemState in the memory.
-  static bool stateExist<K extends StemState>() =>
-      _stateCache.values.any((element) => element is K);
+  static bool stateExist<K extends StemState>() => true;
 
-  T get state => holder.state;
-
-  StemStateInjector({
+  StateInjector({
     Key? key,
-    required T Function() create,
+    required CreateStemState<T> create,
     required Widget child,
-  })  : holder = StateHolder<T>(
-            identity: child.hashCode, create: create, autoInflate: true),
+  })  : holder = _StateDelegate<T>(
+          create: create,
+        ),
         super(
           key: key,
           child: child,
         );
 
-  static K? of<K extends StemState>(BuildContext context) {
-    final ref =
-        context.dependOnInheritedWidgetOfExactType<StemStateInjector<K>>();
+  static K of<K extends StemState>(BuildContext context) {
+    final ref = context.dependOnInheritedWidgetOfExactType<StateInjector<K>>();
 
     if (ref != null) {
-      return ref.holder.state;
+      return ref.holder.owner._state as K;
     }
 
-    throw Exception(
-      "$K not found!",
+    throw FlutterError(
+      '''
+        StateInjector.of() called with a context that does not contain a $K.
+        No ancestor could be found starting from the context that was passed to StateInjector.of<$K>().
+        This can happen if the context you used comes from a widget above the StateInjector.
+        The context used was: $context
+      ''',
     );
   }
 
-  /// Returns the [Element] of [StemStateInjector] from the widget tree
+  /// Returns the [Element] of [StateInjector] from the widget tree
   static _StemStateInjectorElement<K>? elementOf<K extends StemState>(
       BuildContext context) {
     final element =
-        context.getElementForInheritedWidgetOfExactType<StemStateInjector<K>>();
+        context.getElementForInheritedWidgetOfExactType<StateInjector<K>>();
 
     return element as _StemStateInjectorElement<K>?;
   }
 
   @override
-  bool updateShouldNotify(StemStateInjector<T> oldWidget) {
+  bool updateShouldNotify(StateInjector<T> oldWidget) {
     final shouldNotify = oldWidget.child != child;
-
-    if (shouldNotify) {
-      // Removing the unnecessary stemState from the memory
-      final _key = ValueKey(oldWidget.child.hashCode);
-      _stateCache.remove(_key);
-    }
     return shouldNotify;
   }
 
@@ -102,24 +74,41 @@ class StemStateInjector<T extends StemState> extends InheritedWidget {
 }
 
 class _StemStateInjectorElement<T extends StemState> extends InheritedElement {
-  _StemStateInjectorElement(StemStateInjector<T> widget) : super(widget);
+  late T _state;
+
+  T get state => _state;
+
+  _StemStateInjectorElement(StateInjector<T> widget) : super(widget);
 
   @override
-  StemStateInjector<T> get widget => super.widget as StemStateInjector<T>;
+  StateInjector<T> get widget => super.widget as StateInjector<T>;
+
+  @override
+  Widget build() {
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      _state.afterBuild();
+    });
+    return super.build();
+  }
+
+  @override
+  void rebuild() {
+    widget.holder.owner = this;
+    super.rebuild();
+  }
 
   @override
   void mount(Element? parent, Object? newSlot) {
-    widget.state.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      widget.state.afterBuild();
-    });
+    widget.holder.owner = this;
+    _state = widget.holder.create();
+    _state.initState();
+
     super.mount(parent, newSlot);
   }
 
   @override
   void unmount() {
-    widget.state.dispose();
-    widget.holder.deflate();
+    _state.dispose();
     super.unmount();
   }
 }

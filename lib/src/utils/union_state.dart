@@ -1,7 +1,5 @@
 import 'package:flutter/widgets.dart';
 
-import '../stem_notifiers.dart';
-
 enum UnionStateType {
   error,
   loading,

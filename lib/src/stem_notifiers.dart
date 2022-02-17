@@ -79,12 +79,29 @@ class Stem<T> extends ChangeNotifier
     _value = newValue;
 
     if (eventActive) {
+      captureAction("Action: ${onAction(2)}");
       changeEvent(_parent!, name, _temp, _value);
     }
+
     notifyListeners();
   }
 
+  String onAction([int position = 1]) {
+    final action = StackTrace.current
+        .toString()
+        .split('\n')
+        .elementAt(position)
+        .split('      ')
+        .elementAt(1);
+    return action;
+  }
+
   /// force update this stem
+  ///
+  /// Note: This is only for testing purpose do not use this in production.
+  ///
+  /// why? as state must be immutable which means you need to replace the
+  /// whole content of this stem by apply all the operations.
   void forceUpdate() => notifyListeners();
 
   /// A helper to get `value` via call syntax
@@ -188,6 +205,8 @@ class DebouncedStem<T> extends Stem<T> {
       _value = newValue;
 
       if (eventActive) {
+        captureAction("Action: ${onAction()}");
+
         changeEvent(_parent!, name, _temp, _value);
       }
 
@@ -254,6 +273,8 @@ class TripleStem<T> extends Stem<UnionStateType> {
     _error = error;
     value = UnionStateType.error;
     if (eventActive) {
+      captureAction("Action: ${onAction(2)}");
+
       _emitEvent(current, "Error: $error");
     }
   }
@@ -263,6 +284,8 @@ class TripleStem<T> extends Stem<UnionStateType> {
     final current = _getCurrentState();
     value = UnionStateType.loading;
     if (eventActive) {
+      captureAction("Action: ${onAction(2)}");
+
       _emitEvent(current, 'Loading');
     }
   }
@@ -273,6 +296,8 @@ class TripleStem<T> extends Stem<UnionStateType> {
     _data = data;
     value = UnionStateType.data;
     if (eventActive) {
+      captureAction("Action: ${onAction(2)}");
+
       _emitEvent(current, data);
     }
   }

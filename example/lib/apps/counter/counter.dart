@@ -8,7 +8,7 @@ class CounterApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StemStateInjector(
+    return StateInjector(
       create: () => CounterState(),
       child: const CounterPage(),
     );
@@ -28,7 +28,7 @@ class CounterPage extends StatelessWidget {
         child: StemBuilder<CounterState>(
           listenTo: (controller) => [controller.counter],
           builder: (context, controller, child) {
-            return Text("Counter : ${controller.counter.value}");
+            return Text("Counter : ${controller.counter().value}");
           },
         ),
       ),
@@ -38,15 +38,27 @@ class CounterPage extends StatelessWidget {
           children: [
             FloatingActionButton(
               heroTag: "i",
-              tooltip: controller.toString(),
+              tooltip: "Increment",
               onPressed: controller.increment,
               child: const Icon(Icons.arrow_upward_sharp),
             ),
             FloatingActionButton(
               heroTag: "d",
-              tooltip: controller.toString(),
+              tooltip: "Decrement",
               onPressed: controller.decrement,
               child: const Icon(Icons.arrow_downward_sharp),
+            ),
+            FloatingActionButton(
+              heroTag: "undo",
+              tooltip: "Undo",
+              onPressed: controller.undo,
+              child: const Icon(Icons.undo),
+            ),
+            FloatingActionButton(
+              heroTag: "redo",
+              tooltip: "Redo",
+              onPressed: controller.redo,
+              child: const Icon(Icons.redo),
             ),
           ],
         ),

@@ -33,7 +33,7 @@ class TestStemStateWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Root(
-      child: StemStateInjector(
+      child: StateInjector(
         create: () => state,
         child: const Center(
           child: Text("Hello World"),

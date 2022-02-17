@@ -9,8 +9,7 @@ class TodoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StemStateInjector(
-      key: const ValueKey("todolist"),
+    return StateInjector(
       create: () => TodoStateController(),
       child: const TodoList(),
     );

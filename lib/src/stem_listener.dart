@@ -72,21 +72,11 @@ class _StemListenerState<T extends StemState, K>
   T? _controller;
   Stem<K>? _stem;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = StemStateInjector.elementOf<T>(context)?.widget.state;
-    setListeners();
-  }
-
   void _listenerValueChanged() => widget.onListen(_controller!);
 
   @override
   Widget build(BuildContext context) {
-    if (_controller == null) {
-      return ErrorWidget("$T not found.");
-    }
-
+    _controller = StateInjector.of<T>(context);
     return widget.child;
   }
 
@@ -153,8 +143,7 @@ class _MultiStemListenerState<T extends StemState>
   @override
   void initState() {
     super.initState();
-    _controller = StemStateInjector.elementOf<T>(context)?.widget.state;
-
+    _controller = StateInjector.elementOf<T>(context)?.state;
     setListeners();
   }
 

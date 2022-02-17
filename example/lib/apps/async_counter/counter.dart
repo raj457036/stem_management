@@ -8,7 +8,7 @@ class AsyncCounterApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StemStateInjector(
+    return StateInjector(
       key: const ValueKey('async-counter'),
       create: () => AsyncCounterState(),
       child: const CounterPage(),

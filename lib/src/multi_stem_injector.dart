@@ -16,7 +16,7 @@ class MultiStemStateInjector extends StatelessWidget {
     Widget _parent = child;
 
     for (var builder in builders) {
-      _parent = StemStateInjector(create: builder, child: _parent);
+      _parent = StateInjector(create: builder, child: _parent);
     }
 
     return _parent;

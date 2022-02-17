@@ -14,11 +14,7 @@ class StemAccessor<T extends StemState> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    try {
-      final T? _controller = StemStateInjector.of<T>(context);
-      return builder(context, _controller!);
-    } catch (e) {
-      return ErrorWidget(e);
-    }
+    final T _controller = StateInjector.of<T>(context);
+    return builder(context, _controller);
   }
 }

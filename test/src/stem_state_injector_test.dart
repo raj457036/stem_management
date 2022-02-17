@@ -19,7 +19,7 @@ class TestStemStateWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Root(
-      child: StemStateInjector(
+      child: StateInjector(
         create: () => state,
         child: const Center(
           child: Text("Hello World"),
@@ -46,7 +46,7 @@ void main() {
             TestStemStateWidget(state: stemState),
           );
 
-          final stateInMemory = StemStateInjector.stateExist<TestStemState>();
+          final stateInMemory = StateInjector.stateExist<TestStemState>();
 
           expect(stateInMemory, true);
         },
@@ -59,7 +59,7 @@ void main() {
             TestStemStateWidget(state: stemState),
           );
 
-          bool stateInMemory = StemStateInjector.stateExist<TestStemState>();
+          bool stateInMemory = StateInjector.stateExist<TestStemState>();
 
           expect(stateInMemory, true);
 
@@ -67,7 +67,7 @@ void main() {
           // with Center widget
           await tester.pumpWidget(const Center());
 
-          stateInMemory = StemStateInjector.stateExist<TestStemState>();
+          stateInMemory = StateInjector.stateExist<TestStemState>();
 
           expect(stateInMemory, false);
         },

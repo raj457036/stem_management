@@ -1,11 +1,25 @@
 import 'package:meta/meta.dart';
+
 import 'package:stem/stem.dart';
+
+class StemTransition<T> {
+  final String name;
+  final T oldValue;
+  final T newValue;
+
+  StemTransition(this.name, this.oldValue, this.newValue);
+
+  @override
+  String toString() =>
+      'Transition(name: $name, oldValue: $oldValue, newValue: $newValue)';
+}
 
 abstract class StemChangeObserver {
   void onCreateStemState(StemState state) {}
   void onDisposeStemState(StemState state) {}
-  void onStemChange(
-      StemState state, String name, Object oldValue, Object newValue) {}
+  void onTransition(StemState state, StemTransition transition) {}
+  void onActionTrigger(Object value) {}
+
   void onCustomStemEvent(StemState state, Object value) {}
 }
 
@@ -40,7 +54,16 @@ mixin StemEventNotifier {
     if (!eventActive) return;
     if (StemConfig.instance.observer != null) {
       StemConfig.instance.observer
-          ?.onStemChange(state, name, oldValue, newValue);
+          ?.onTransition(state, StemTransition(name, oldValue, newValue));
+    }
+  }
+
+  @mustCallSuper
+  @protected
+  void captureAction(Object action) {
+    if (!eventActive) return;
+    if (StemConfig.instance.observer != null) {
+      StemConfig.instance.observer?.onActionTrigger(action);
     }
   }
 

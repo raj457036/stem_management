@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
-import 'stem_state_injector.dart';
 import 'stem_state.dart';
+import 'stem_state_injector.dart';
 import 'types.dart';
 
 class StemBuilder<T extends StemState> extends StatefulWidget {
@@ -26,7 +26,7 @@ class _StemBuilderState<T extends StemState> extends State<StemBuilder<T>> {
   @override
   void initState() {
     super.initState();
-    _controller = StemStateInjector.elementOf<T>(context)?.widget.state;
+    _controller = StateInjector.elementOf<T>(context)?.state;
     setListeners();
   }
 
@@ -35,7 +35,7 @@ class _StemBuilderState<T extends StemState> extends State<StemBuilder<T>> {
   @override
   Widget build(BuildContext context) {
     try {
-      final T? _controller = StemStateInjector.of<T>(context);
+      final T? _controller = StateInjector.of<T>(context);
       return widget.builder(context, _controller!, widget.child);
     } catch (e) {
       return ErrorWidget(e);
